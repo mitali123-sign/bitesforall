@@ -1,0 +1,35 @@
+<html>
+    <body>
+      <script>
+      function setThumbnail(event) {
+        let reader = new FileReader();
+        let count = 0;
+        let down = 1
+        count = count + 1;
+        reader.onload = function(event) {
+          let img = document.createElement("img");
+          img.setAttribute("src", event.target.result);
+          let imgcontainer = document.querySelector("div#img_container");
+          if(count == 2){
+            count = 0;
+            imgcontainer.removeChild('imgcontainer');
+            down = down - 1;
+          }
+            imgcontainer.appendChild(img);
+        };
+        reader.readAsDataURL(event.target.files[0]);
+        console.log(count);
+        console.log(down);
+        //이미지 2번 연속 업데이트 했을 때 미리보기가 2개 뜸.
+
+      }
+      </script>
+        <form action = "http://localhost:5000/imgModel" method = "POST"
+            enctype = "multipart/form-data">
+            <input type = "file" name = "file" accept="image/*" onchange="setThumbnail(event);"/>
+            <input type = "submit"/>
+            <div id="img_container"></div>
+
+        </form>
+    </body>
+</html>

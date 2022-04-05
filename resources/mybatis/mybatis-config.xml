@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+    <typeAliases>
+        <typeAlias type="openminder.emeal.domain.account.Account" alias="account" />
+        <typeAlias type="openminder.emeal.domain.account.Authority" alias="authority" />
+        <typeAlias type="openminder.emeal.domain.file.UploadFile" alias="uploadFile" />
+        <typeAlias type="openminder.emeal.domain.account.Attendance" alias="attendance" />
+
+        <typeAlias type="openminder.emeal.domain.post.Post" alias="post" />
+        <typeAlias type="openminder.emeal.domain.post.Menu" alias="menu" />
+        <typeAlias type="openminder.emeal.domain.post.Nutrient" alias="nutrient" />
+        <typeAlias type="openminder.emeal.domain.post.NutrientSum" alias="nutrientSum" />
+        <typeAlias type="openminder.emeal.domain.file.Picture" alias="picture" />
+    </typeAliases>
+</configuration>

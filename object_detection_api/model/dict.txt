@@ -1,0 +1,9 @@
+background
+pizza
+rice_roll
+fried_chicken
+ramen
+seasoned_spicy_chicken
+porridge
+stir_fried_rice_cake
+caesar_salad

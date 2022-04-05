@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="openminder.emeal.mapper.account.AccountRepository">
+    <resultMap id="accountResultMap" type="openminder.emeal.domain.account.Account">
+        <id column="ACCOUNT_ID" property="accountId" />
+        <result column="USERNAME" property="username" />
+        <result column="USER_ID" property="userId" />
+        <result column="PASSWORD" property="password" />
+        <result column="GOAL" property="goal" />
+        <association column="USERNAME" property="avatar" javaType="uploadFile" select="selectAvatarByUserName" />
+        <collection column="USERNAME" property="authorities" javaType="java.util.ArrayList" ofType="Authority" select="findAuthoritiesByUserName" />
+
+    </resultMap>
+
+    <insert id="insertUser" parameterType="account">
+        INSERT INTO account(USERNAME, USER_ID, PASSWORD, GOAL, IS_ACCOUNT_NON_EXPIRED, IS_ACCOUNT_NON_LOCKED, IS_CREDENTIALS_NON_EXPIRED, IS_ENABLED)
+        VALUES (#{username}, #{userId}, #{password}, #{goal}, #{isAccountNonExpired}, #{isAccountNonLocked}, #{isCredentialsNonExpired}, #{isEnabled})
+    </insert>
+    <insert id="insertUserAuthority" parameterType="authority">
+        INSERT INTO authority(AUTHORITY_NAME, USERNAME)
+        VALUES (#{authorityName}, #{username})
+    </insert>
+    <insert id="insertAvatar" parameterType="uploadFile">
+        INSERT INTO avatar(FILE_NAME, FILE_DOWNLOAD_URI, FILE_TYPE, SIZE, USERNAME)
+        VALUES (#{fileName}, #{fileDownloadUri}, #{fileType}, #{size}, #{username})
+    </insert>
+    <insert id="insertAttendance" parameterType="attendance">
+        INSERT INTO attendance(USERNAME, YEAR_AND_MONTH, day)
+        VALUES (#{username}, #{yearAndMonth}, #{day})
+    </insert>
+
+
+    <select id="findByUserName" parameterType="String" resultMap="accountResultMap">
+        SELECT * FROM account
+        WHERE username = #{username}
+    </select>
+    <select id="findById" parameterType="long" resultMap="accountResultMap">
+        SELECT * FROM account
+        WHERE account_id = #{accountId}
+    </select>
+    <select id="findAuthoritiesByUserName" parameterType="String" resultType="authority">
+        SELECT * FROM authority
+        WHERE username = #{username}
+    </select>
+    <select id="existsByUsername" parameterType="String" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM account WHERE username = #{username})
+    </select>
+    <select id="selectAvatarByUserName" parameterType="String" resultType="uploadFile">
+        SELECT * FROM avatar
+        WHERE username = #{username}
+    </select>
+    <select id="selectAttendance" parameterType="attendance" resultType="attendance">
+        SELECT * FROM attendance
+        WHERE username = #{username} AND year_and_month = #{yearAndMonth} AND day = #{day}
+    </select>
+    <select id="selectWater" parameterType="String" resultType="integer">
+        SELECT WATER FROM account
+        WHERE username = #{username}
+    </select>
+    <select id="selectWeight" parameterType="String" resultType="integer">
+        SELECT weight FROM account
+        WHERE username = #{username}
+    </select>
+
+    <update id="updateAvatar" parameterType="uploadFile">
+        UPDATE avatar SET
+            FILE_NAME = #{fileName},
+            FILE_DOWNLOAD_URI = #{fileDownloadUri},
+            FILE_TYPE = #{fileType},
+            SIZE = #{size}
+        WHERE username = #{username}
+    </update>
+    <update id="updateAccount" parameterType="account">
+        UPDATE account SET
+            USER_ID = #{userId},
+            GOAL = #{goal},
+            HEIGHT = #{height},
+            WEIGHT = #{weight},
+            AGE = #{age}
+        WHERE username = #{username}
+    </update>
+    <update id="updateWaterPlus" parameterType="String">
+        UPDATE account SET
+        WATER = WATER + 1
+        WHERE username = #{username}
+    </update>
+    <update id="updateWaterMinus" parameterType="String">
+        UPDATE account SET
+        WATER = WATER - 1
+        WHERE username = #{username}
+    </update>
+
+    <delete id="deleteAvatar" parameterType="uploadFile">
+        DELETE FROM avatar WHERE username = #{username}
+    </delete>
+</mapper>

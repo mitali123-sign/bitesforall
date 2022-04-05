@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="openminder.emeal.mapper.post.PostRepository">
+    <resultMap id="postResultMap" type="openminder.emeal.domain.post.Post">
+        <id column="POST_ID" property="postId" />
+        <result column="CONTENT" property="content" />
+        <result column="USER_ID" property="userId" />
+        <result column="POST_TYPE" property="postType" />
+        <result column="MEAL_TYPE" property="mealType" />
+        <result column="INSERT_TIME" property="insertTime" />
+        <result column="UPDATE_TIME" property="updateTime" />
+        <collection column="POST_ID" property="pictures" javaType="java.util.ArrayList" ofType="Picture" select="findPictureByPostId" />
+        <collection column="POST_ID" property="menus" javaType="java.util.ArrayList" ofType="Menu" select="selectMenus" />
+    </resultMap>
+    <resultMap id="menuResultMap" type="openminder.emeal.domain.post.Menu">
+        <id column="MENU_ID" property="menuId" />
+        <result column="MENU_NAME" property="menuName" />
+        <result column="POST_ID" property="postId" />
+        <association column="MENU_ID" property="nutrient" javaType="Nutrient" select="findNutrientByMenuId" />
+    </resultMap>
+
+    <insert id="insertPost" parameterType="post">
+        INSERT INTO post(CONTENT, USER_ID, POST_TYPE, MEAL_TYPE, USERNAME, AVATAR_DOWNLOAD_URI)
+        VALUES (#{content}, #{userId}, #{postType}, #{mealType}, #{username}, #{avatarDownloadUri})
+
+        <selectKey keyProperty="postId" resultType="long" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+    <insert id="insertPicture" parameterType="picture">
+        INSERT INTO picture(PICTURE_NAME, PICTURE_DOWNLOAD_URI, PICTURE_TYPE, SIZE, POST_ID)
+        VALUES (#{pictureName}, #{pictureDownloadUri}, #{pictureType}, #{size}, #{postId})
+    </insert>
+    <insert id="insertMenu" parameterType="menu">
+        INSERT INTO menu(MENU_NAME, POST_ID)
+        VALUES (#{menuName}, #{postId})
+        <selectKey keyProperty="menuId" resultType="long" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+    <insert id="insertNutrient" parameterType="nutrient">
+        INSERT INTO nutrient(NUTRIENT_TYPE, CALORIE, CARBOHYDRATE, PROTEIN, FAT, SUGARS, SODIUM, CHOLESTEROL, FATTY_ACID, TRANS_FAT, MENU_ID, USERNAME)
+        VALUES (#{nutrientType}, #{calorie}, #{carbohydrate}, #{protein}, #{fat}, #{sugars}, #{sodium}, #{cholesterol}, #{fattyAcid}, #{transFat}, #{menuId}, #{username})
+    </insert>
+
+    <select id="selectPosts" parameterType="String" resultMap="postResultMap">
+        SELECT * FROM post
+        WHERE post_type = #{postType}
+    </select>
+    <select id="selectRecentPosts" parameterType="long" resultMap="postResultMap">
+        SELECT * FROM (SELECT * FROM post ORDER BY post_id DESC LIMIT #{numPosts}) as recent_posts;
+    </select>
+    <select id="selectUserPosts" parameterType="String" resultMap="postResultMap">
+        SELECT * FROM post
+        WHERE username = #{username}
+    </select>
+    <select id="selectOnePost" parameterType="long" resultMap="postResultMap">
+        SELECT * FROM post
+        WHERE post_id = #{postId}
+    </select>
+    <select id="selectMenus" parameterType="long" resultMap="menuResultMap">
+        SELECT * FROM menu
+        WHERE post_id = #{postId}
+    </select>
+    <select id="selectNutrients" parameterType="String" resultType="nutrientSum">
+        SELECT SUM(carbohydrate) as carbohydrate, SUM(protein) as protein, SUM(fat) as fat, DATE(insert_time) as date
+        FROM nutrient WHERE username = #{username} GROUP BY date ORDER BY date;
+    </select>
+    <select id="findPictureByPostId" parameterType="long" resultType="picture">
+        SELECT * FROM picture
+        WHERE post_id = #{postId}
+    </select>
+    <select id="findNutrientByMenuId" parameterType="long" resultType="nutrient">
+        SELECT * FROM nutrient
+        WHERE menu_id = #{menuId}
+    </select>
+    <select id="selectOneDayNutrient" parameterType="String" resultType="nutrient">
+        SELECT * FROM nutrient
+        WHERE insert_time >= CURDATE()
+        AND username = #{username}
+    </select>
+
+    <update id="updateAccountInfo" parameterType="post">
+        UPDATE post SET
+            USER_ID = #{userId},
+            AVATAR_DOWNLOAD_URI = #{avatarDownloadUri}
+        WHERE username = #{username}
+    </update>
+</mapper>
